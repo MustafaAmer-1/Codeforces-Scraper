@@ -1,12 +1,14 @@
 import os, json, time
-import requests
 
 from languages import get_lang_ext
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.options import Options
 
 path = 'submissions'
-browser = webdriver.Chrome(ChromeDriverManager().install())
+options = Options()
+options.headless = True
+browser = webdriver.Chrome(ChromeDriverManager().install(), options=options)
 
 def save(path, filename, content):
     with open(os.path.join(path, filename), 'w+') as file:
@@ -36,16 +38,11 @@ def process_data(data):
             
 def get_code(id, contestId):
     url = f"https://codeforces.com/contest/{contestId}/submission/{id}"
-    res = requests.get(url)
     browser.get(url)
-    time.sleep(1)
-    return browser.find_element_by_id('program-source-text').text
-
-def login():
-    browser.get("https://codeforces.com/enter")
-    browser.find_element_by_id('handleOrEmail').send_keys(os.environ['CF_USER'])
-    browser.find_element_by_id('password').send_keys(os.environ['CF_PASS'])
-    browser.find_element_by_class_name('submit').click()
-    time.sleep(5)
+    time.sleep(0.2)
+    try:
+        return browser.find_element_by_id('program-source-text').text
+    except:
+        raise Exception(f"too many requests, try again later, last submisson id: {id}, contestId: {contestId}")
 
 visited = load_visited()

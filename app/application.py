@@ -1,17 +1,11 @@
 import requests, os
 from time import sleep
-from healper import process_data, dumb_visited_problems, login
-from cookies import cookieHelper
+from healper import process_data, dumb_visited_problems
 URL = "https://codeforces.com/api/user.status"
 FROM = 1
 COUNT = 200
 
 def app():
-    login()
-    cookies = cookieHelper()
-    if cookies == None:
-        print("No cookies found!!")
-        return
     with requests.Session() as s:
         params = {
             'handle' : os.environ['CF_USER'],
@@ -32,6 +26,8 @@ def app():
                     print('...Done...')
                     return
             print('Request Problem...\nstatus_code: ' + res.status_code)
+        except Exception as e:
+            print(e)
         finally:
             dumb_visited_problems()
 if __name__ == '__main__':
