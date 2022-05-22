@@ -26,13 +26,13 @@ def load_visited():
 
 def process_data(data):
     for submission in data['result']:
-        if(submission['verdict'] == 'OK' and visited.get(submission['id'], 0) == 0):
-            id = submission['id']
-            contestId = submission['contestId']
+        id = submission['id']
+        contestId = submission['contestId']
+        file_name = submission['problem']['name'].replace(' ', '_') + get_lang_ext(submission['programmingLanguage'])
+        if(submission['verdict'] == 'OK' and visited.get(file_name, -1) < id):
             code = get_code(id, contestId)
-            file_name = submission['problem']['name'].replace(' ', '_') + get_lang_ext(submission['programmingLanguage'])
             save(path, file_name, code)
-            visited[id] = True
+            visited[file_name] = id
             
 def get_code(id, contestId):
     url = f"https://codeforces.com/contest/{contestId}/submission/{id}"
