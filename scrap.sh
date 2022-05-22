@@ -1,2 +1,2 @@
-mkdir submissions
-python app/application.py
+mkdir -p submissions
+python3 app/application.py
