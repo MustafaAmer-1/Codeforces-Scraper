@@ -42,8 +42,8 @@ def get_code(id, contestId):
     soup = BeautifulSoup(res.text, 'html.parser')
     if("Illegal contest ID" in res.text):
         return ''
-    if("too many requests" in res.text):
-        raise Exception(f"too many requests, try again later, last submisson id: {id}, contestId: {contestId}")
+    if("Too many requests" in res.text):
+        raise Exception(f"Too many requests, try again later, last submisson id: {id}, contestId: {contestId}")
     return soup.find(id="program-source-text").text
 
 visited = load_visited()
