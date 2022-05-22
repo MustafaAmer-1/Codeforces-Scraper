@@ -1,4 +1,4 @@
-import os, json
+import os, json, time
 import requests
 
 from languages import get_lang_ext
@@ -38,6 +38,14 @@ def get_code(id, contestId):
     url = f"https://codeforces.com/contest/{contestId}/submission/{id}"
     res = requests.get(url)
     browser.get(url)
+    time.sleep(1)
     return browser.find_element_by_id('program-source-text').text
+
+def login():
+    browser.get("https://codeforces.com/enter")
+    browser.find_element_by_id('handleOrEmail').send_keys(os.environ['CF_USER'])
+    browser.find_element_by_id('password').send_keys(os.environ['CF_PASS'])
+    browser.find_element_by_class_name('submit').click()
+    time.sleep(5)
 
 visited = load_visited()
