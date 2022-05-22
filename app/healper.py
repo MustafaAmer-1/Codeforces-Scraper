@@ -1,14 +1,10 @@
-import os, json, time
+import os, json, requests
 
 from languages import get_lang_ext
-from selenium import webdriver
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.chrome.options import Options
+from bs4 import BeautifulSoup
 
 path = 'submissions'
-options = Options()
-options.headless = True
-browser = webdriver.Chrome(ChromeDriverManager().install(), options=options)
+session = requests.Session()
 
 def save(path, filename, content):
     with open(os.path.join(path, filename), 'w+') as file:
@@ -24,6 +20,7 @@ def load_visited():
             new_dict = json.load(file)
     except ValueError:
         new_dict = {} 
+    new_dict['invalid_submission'] = []
     return new_dict
 
 def process_data(data):
@@ -33,16 +30,20 @@ def process_data(data):
         file_name = submission['problem']['name'].replace(' ', '_') + get_lang_ext(submission['programmingLanguage'])
         if(submission['verdict'] == 'OK' and visited.get(file_name, -1) < id):
             code = get_code(id, contestId)
-            save(path, file_name, code)
-            visited[file_name] = id
+            if(len(code)):
+                save(path, file_name, code)
+                visited[file_name] = id
+            else:
+                visited['invalid_submission'].append({'id': id, 'contestId': contestId})
             
 def get_code(id, contestId):
     url = f"https://codeforces.com/contest/{contestId}/submission/{id}"
-    browser.get(url)
-    time.sleep(0.2)
-    try:
-        return browser.find_element_by_id('program-source-text').text
-    except:
+    res = session.get(url)
+    soup = BeautifulSoup(res.text, 'html.parser')
+    if("Illegal contest ID" in res.text):
+        return ''
+    if("too many requests" in res.text):
         raise Exception(f"too many requests, try again later, last submisson id: {id}, contestId: {contestId}")
+    return soup.find(id="program-source-text").text
 
 visited = load_visited()
